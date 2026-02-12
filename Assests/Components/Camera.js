@@ -14,6 +14,10 @@ import {
   useCameraDevice,
   useCameraPermission,
 } from 'react-native-vision-camera';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import { useMediaPermission, savePicture } from './CameraPerms';
+import { useIsAppActive } from './hooks';
+import { useIsFocused } from '@react-navigation/native';
 
 const imgs = {
   captureIcon: require('../Images/Icons/capture.png'),
@@ -22,31 +26,53 @@ const imgs = {
 export default function CameraScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loadingIndicator, setLoadingIndicator] = useState(false);
+  // app and page state
+  const cameraActive = useIsAppActive();
+  const isFocused = useIsFocused();
+
   const [tempImg, setTempImg] = useState(null);
   const cameraRef = useRef(null);
-  const { hasPermission, requestPermission } = useCameraPermission();
   const backCamera = useCameraDevice('back');
+  // the permissions hooks
+  const { hasPermission: hasCameraPermission, requestPermission } =
+    useCameraPermission();
+  const {
+    hasPermission: hasMediaPermission,
+    requestPermission: requestMediaPermission,
+  } = useMediaPermission();
 
   const handleCapture = async () => {
+    console.log('Pressed');
     setLoadingIndicator(true);
     try {
       if (!cameraRef.current) return; // not ready yet
       const photo = await cameraRef.current.takePhoto();
-      setTempImg(String(photo.path));
+      setTempImg(String(photo.path)); //set temp images path
     } catch (e) {
       console.log(e);
     } finally {
+      //currently no does not show the error to the user
       setLoadingIndicator(false);
       setModalVisible(true);
     }
   };
 
-  if (!hasPermission) {
-    //permission for camera
+  if (!hasCameraPermission || !hasMediaPermission) {
+    //permission for camera and Media
     return (
       <View style={styles.centerdContainer}>
         <Text>Permission Not Granted</Text>
-        <Button title="Grant Permission" onPress={() => requestPermission()} />
+
+        <Button
+          title="Grant Permission | Camera"
+          onPress={() => requestPermission()}
+          disabled={hasCameraPermission}
+        />
+        <Button
+          title="Grant Permission | Storage"
+          onPress={() => requestMediaPermission()}
+          disabled={hasMediaPermission}
+        />
       </View>
     );
   }
@@ -59,23 +85,30 @@ export default function CameraScreen() {
       </View>
     );
   }
-
+  // console.log(isFocused + '  ' + cameraActive);
   return (
     <View style={{ position: 'relative', flex: 1 }}>
-      <Camera
-        ref={cameraRef}
-        isActive={true}
-        device={backCamera}
-        style={styles.cameraStyle}
-        photo={true}
-      />
+      {/* make sure we unmounts the camera  if swithed to another page or exit app  */}
+      {cameraActive && isFocused ? (
+        <Camera
+          ref={cameraRef}
+          isActive
+          device={backCamera}
+          style={styles.cameraStyle}
+          photo
+        />
+      ) : (
+        <View style={styles.centerdContainer}>
+          <Text>Camera inactive</Text>
+        </View>
+      )}
       <Pressable onPress={handleCapture} style={styles.captureOverlay}>
         <Image style={styles.captureIcon} source={imgs.captureIcon} />
       </Pressable>
+      {/* preview image modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
-        presentationStyle="pageSheet"
         onRequestClose={() => setModalVisible(false)}>
         <Image
           source={{ uri: 'file://' + tempImg }}
@@ -118,15 +151,15 @@ export default function CameraScreen() {
   );
   async function handleSaveImage() {
     try {
+      // console.log(hasMediaPermission);
+      if (!hasMediaPermission) await requestMediaPermission();
       const fileName = `image_${Date.now()}.jpg`;
-
-      const newPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
-
-      await RNFS.copyFile(tempImg, newPath);
-
-      console.log('Saved at:', newPath);
-
-      // return newPath;
+      await savePicture({
+        uri: `file://${tempImg}`,
+        type: 'photo',
+        album: 'Jovision Album',
+        hasPermission: hasMediaPermission,
+      });
     } catch (error) {
       console.log('Error saving image:', error);
     } finally {
@@ -140,6 +173,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 20,
   },
   cameraStyle: {
     flex: 1,

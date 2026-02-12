@@ -1,9 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import CameraScreen from '../Camera';
+import CameraScreen from './Camera';
+import SensorsScreen from './Sensors';
 import { Image, StyleSheet } from 'react-native';
 const Tab = createBottomTabNavigator();
 const icons = {
   camera: require('../../Images/Icons/camera.png'),
+  sensors: require('../../Images/Icons/sensors.png'),
 };
 
 export default function RootStack() {
@@ -24,17 +26,17 @@ export default function RootStack() {
           tabBarActiveTintColor: 'blue',
         }}
       />
-      {/* <Tab.Screen
+      <Tab.Screen
         name="Sensors"
-        component={CameraScreen}
+        component={SensorsScreen}
         options={{
           title: 'Sensors',
           tabBarIcon: () => (
-            <Image source={icons.camera} style={styles.image} />
+            <Image source={icons.sensors} style={styles.image} />
           ),
           tabBarActiveTintColor: 'blue',
         }}
-      /> */}
+      />
     </Tab.Navigator>
   );
 }

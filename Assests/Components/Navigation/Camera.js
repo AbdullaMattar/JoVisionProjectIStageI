@@ -15,12 +15,12 @@ import {
   useCameraPermission,
 } from 'react-native-vision-camera';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
-import { useMediaPermission, savePicture } from './CameraPerms';
-import { useIsAppActive } from './hooks';
+import { useMediaPermission, savePicture } from '../CameraPerms';
+import { useIsAppActive } from '../hooks';
 import { useIsFocused } from '@react-navigation/native';
 
 const imgs = {
-  captureIcon: require('../Images/Icons/capture.png'),
+  captureIcon: require('../../Images/Icons/capture.png'),
 };
 
 export default function CameraScreen() {

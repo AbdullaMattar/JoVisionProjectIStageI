@@ -1,11 +1,13 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import CameraScreen from './Camera';
 import SensorsScreen from './Sensors';
+import Gallary from './Gallary';
 import { Image, StyleSheet } from 'react-native';
 const Tab = createBottomTabNavigator();
 const icons = {
   camera: require('../../Images/Icons/camera.png'),
   sensors: require('../../Images/Icons/sensors.png'),
+  gallary: require('../../Images/Icons/gallary.png'),
 };
 
 export default function RootStack() {
@@ -33,6 +35,17 @@ export default function RootStack() {
           title: 'Sensors',
           tabBarIcon: () => (
             <Image source={icons.sensors} style={styles.image} />
+          ),
+          tabBarActiveTintColor: 'blue',
+        }}
+      />
+      <Tab.Screen
+        name="Gallary"
+        component={Gallary}
+        options={{
+          title: 'Gallary',
+          tabBarIcon: () => (
+            <Image source={icons.gallary} style={styles.image} />
           ),
           tabBarActiveTintColor: 'blue',
         }}

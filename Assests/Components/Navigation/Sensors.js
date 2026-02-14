@@ -9,33 +9,29 @@ import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 
 export default function () {
+  const [isOn, setIsOn] = useState(true);
   const isFocused = useIsFocused();
   const appActive = useIsAppActive();
   const {
     isGranted: hasLocPerm,
     CheckPermission: checkLocPerm,
     location: location,
-    toggle: toggle,
-  } = useGeoLocationPermission();
-  const [isOn, setIsOn] = useState(true);
+  } = useGeoLocationPermission(isOn);
   const { x, y, z } = useOrientationXYZ(isOn);
 
   useEffect(() => {
     if (!hasLocPerm) checkLocPerm();
   }, []);
+
   useEffect(() => {
-    if (hasLocPerm) toggle(true);
-  }, [hasLocPerm]);
-  useEffect(() => {
-    if (!isFocused || !appActive) {
-      toggle(false);
+    if (!isFocused || (!appActive && hasLocPerm)) {
+      // toggle(false);
       setIsOn(false);
-    }
-    if (isFocused && appActive && hasLocPerm) {
-      toggle(true);
+    } else {
+      // toggle(true);
       setIsOn(true);
     }
-  }, [isFocused, appActive]);
+  }, [isFocused, appActive, hasLocPerm]);
 
   if (!location) return <Text>Waiting</Text>;
   if (!isFocused || !appActive) return <Text>Screen is Turned Off</Text>;

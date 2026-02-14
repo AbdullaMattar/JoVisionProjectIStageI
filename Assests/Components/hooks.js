@@ -20,10 +20,9 @@ export function useIsAppActive() {
   return isActive;
 }
 
-export function useGeoLocationPermission() {
+export function useGeoLocationPermission(isOn = true) {
   const [isGranted, setIsGranted] = useState(false);
   const [location, setLocation] = useState(null);
-  const [isOn, setIsOn] = useState(false);
 
   async function CheckPermission() {
     Geolocation.requestAuthorization(
@@ -31,9 +30,7 @@ export function useGeoLocationPermission() {
       () => setIsGranted(false)
     );
   }
-  function toggle(bool) {
-    setIsOn(bool);
-  }
+
   function GetLoc() {
     console.log('tick');
     Geolocation.getCurrentPosition(
@@ -47,14 +44,16 @@ export function useGeoLocationPermission() {
   }
 
   useEffect(() => {
-    // console.log(isGranted + '  ' + isOn);
+    console.log('isOn ' + isOn);
     if (!isGranted || !isOn) return;
-    GetLoc();
-    const timer = setInterval(() => GetLoc(), 10_000);
-    return () => clearInterval(timer);
-  }, [isOn]);
 
-  return { isGranted, CheckPermission, location, toggle };
+    GetLoc();
+    const timer = setInterval(GetLoc, 10000);
+
+    return () => clearInterval(timer);
+  }, [isGranted, isOn]);
+
+  return { isGranted, CheckPermission, location };
 }
 
 export function useOrientationXYZ(isOn = true) {
@@ -62,7 +61,7 @@ export function useOrientationXYZ(isOn = true) {
 
   useEffect(() => {
     if (!isOn) return;
-
+    console.log('on');
     setUpdateIntervalForType(SensorTypes.accelerometer, 500);
 
     const sub = accelerometer.subscribe(({ x, y, z }) => {

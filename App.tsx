@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import RootStack from './Assests/Components/Navigation/RootStack';
+import { SensorTypes } from 'react-native-sensors';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';

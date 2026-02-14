@@ -1,11 +1,15 @@
-import { AppState } from 'react-native';
-import { useEffect, useState } from 'react';
+import { AppState, Platform } from 'react-native';
+import { useEffect, useState, useCallback } from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import {
   accelerometer,
   SensorTypes,
   setUpdateIntervalForType,
 } from 'react-native-sensors';
+import {
+  CameraRoll,
+  cameraRollEventEmitter,
+} from '@react-native-camera-roll/camera-roll';
 
 export function useIsAppActive() {
   const [isActive, setIsActive] = useState(AppState.currentState === 'active');
@@ -76,4 +80,48 @@ export function useOrientationXYZ(isOn = true) {
   }, [isOn]);
 
   return xyz;
+}
+
+const APP_ALBUM = 'Jovision Album';
+const isAndroid = Platform.OS === 'android';
+
+function toDto(edges) {
+  return edges.map(({ node }) => ({
+    id: node.image.uri,
+    uri: node.image.uri,
+    filename: node.image.filename,
+    timestamp: node.timestamp,
+  }));
+}
+
+export function useGallery(albumName = 'Jovision Album') {
+  const [photos, setPhotos] = useState([]); // array of URIs
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function loadPhotos() {
+    try {
+      const res = await CameraRoll.getPhotos({
+        first: 100,
+        assetType: 'Photos',
+        groupTypes: 'Album',
+        groupName: 'Jovision Album',
+      });
+
+      setPhotos(res.edges.map(e => e.node.image.uri));
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async function refresh() {
+    setRefreshing(true);
+    await loadPhotos();
+    setRefreshing(false);
+  }
+
+  useEffect(() => {
+    loadPhotos();
+  }, []);
+
+  return { photos, refreshing, refresh };
 }

@@ -14,7 +14,6 @@ import {
   useCameraDevice,
   useCameraPermission,
 } from 'react-native-vision-camera';
-import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { useMediaPermission, savePicture } from '../CameraPerms';
 import { useIsAppActive } from '../hooks';
 import { useIsFocused } from '@react-navigation/native';

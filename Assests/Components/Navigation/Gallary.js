@@ -7,11 +7,14 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
-import { useGallery } from '../hooks';
+import { useGallery, useIsAppActive } from '../hooks';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function Gallery() {
   const { photos, refreshing, refresh } = useGallery('Jovision Album');
-
+  const isFocused = useIsFocused();
+  const isAppActive = useIsAppActive();
+  if (!isFocused || !isAppActive) return <Text>Not Active</Text>;
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Gallery</Text>

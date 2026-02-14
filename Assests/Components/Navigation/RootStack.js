@@ -2,17 +2,20 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import CameraScreen from './Camera';
 import SensorsScreen from './Sensors';
 import Gallary from './Gallary';
+import Slideshow from './Slideshow';
 import { Image, StyleSheet } from 'react-native';
 const Tab = createBottomTabNavigator();
 const icons = {
   camera: require('../../Images/Icons/camera.png'),
   sensors: require('../../Images/Icons/sensors.png'),
   gallary: require('../../Images/Icons/gallary.png'),
+  slideshow: require('../../Images/Icons/slideshow.png'),
 };
 
 export default function RootStack() {
   return (
     <Tab.Navigator
+      initialRouteName="Slideshow"
       screenOptions={{
         headerShown: false,
         tabBarStyle: { height: 60, paddingTop: 10 },
@@ -46,6 +49,17 @@ export default function RootStack() {
           title: 'Gallary',
           tabBarIcon: () => (
             <Image source={icons.gallary} style={styles.image} />
+          ),
+          tabBarActiveTintColor: 'blue',
+        }}
+      />
+      <Tab.Screen
+        name="Slideshow"
+        component={Slideshow}
+        options={{
+          title: 'Slideshow',
+          tabBarIcon: () => (
+            <Image source={icons.slideshow} style={styles.image} />
           ),
           tabBarActiveTintColor: 'blue',
         }}

@@ -85,15 +85,6 @@ export function useOrientationXYZ(isOn = true) {
 const APP_ALBUM = 'Jovision Album';
 const isAndroid = Platform.OS === 'android';
 
-function toDto(edges) {
-  return edges.map(({ node }) => ({
-    id: node.image.uri,
-    uri: node.image.uri,
-    filename: node.image.filename,
-    timestamp: node.timestamp,
-  }));
-}
-
 export function useGallery(albumName = 'Jovision Album') {
   const [photos, setPhotos] = useState([]); // array of URIs
   const [refreshing, setRefreshing] = useState(false);
@@ -101,7 +92,7 @@ export function useGallery(albumName = 'Jovision Album') {
   async function loadPhotos() {
     try {
       const res = await CameraRoll.getPhotos({
-        first: 100,
+        first: 20,
         assetType: 'Photos',
         groupTypes: 'Album',
         groupName: 'Jovision Album',

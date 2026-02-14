@@ -1,8 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
-import { useGeoLocationPermission, useIsAppActive } from '../hooks';
+import {
+  useGeoLocationPermission,
+  useIsAppActive,
+  useOrientationXYZ,
+} from '../hooks';
 import { useIsFocused } from '@react-navigation/native';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function () {
   const isFocused = useIsFocused();
@@ -13,6 +17,8 @@ export default function () {
     location: location,
     toggle: toggle,
   } = useGeoLocationPermission();
+  const [isOn, setIsOn] = useState(true);
+  const { x, y, z } = useOrientationXYZ(isOn);
 
   useEffect(() => {
     if (!hasLocPerm) checkLocPerm();
@@ -21,8 +27,14 @@ export default function () {
     if (hasLocPerm) toggle(true);
   }, [hasLocPerm]);
   useEffect(() => {
-    if (!isFocused || !appActive) toggle(false);
-    if (isFocused && appActive && hasLocPerm) toggle(true);
+    if (!isFocused || !appActive) {
+      toggle(false);
+      setIsOn(false);
+    }
+    if (isFocused && appActive && hasLocPerm) {
+      toggle(true);
+      setIsOn(true);
+    }
   }, [isFocused, appActive]);
 
   if (!location) return <Text>Waiting</Text>;
@@ -39,9 +51,9 @@ export default function () {
       </View>
       <View style={styles.centerdBox}>
         <Text>( X , Y , Z ) orientation: </Text>
-        <Text>X: {location.altitude}</Text>
-        <Text>Y: {location.latitude}</Text>
-        <Text>Z: {location.longitude}</Text>
+        <Text>X: {x}</Text>
+        <Text>Y: {y}</Text>
+        <Text>Z: {z}</Text>
       </View>
     </View>
   );

@@ -14,12 +14,12 @@ import { useEffect, useRef, useState } from 'react';
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function Slideshow() {
+  const indexRef = useRef(0);
   const isFocused = useIsFocused();
   const isAppActive = useIsAppActive();
   const { photos, refreshing, refresh } = useGallery('Jovision Album');
   const SlideShowRef = useRef();
   const [isPaused, setIsPaused] = useState(false);
-  const indexRef = useRef(0);
 
   useEffect(() => {
     if (isPaused || !isFocused || !isAppActive || photos.length === 0) return;
@@ -40,6 +40,7 @@ export default function Slideshow() {
     <View style={styles.container}>
       {/* <Text>Slideshow</Text> */}
       <FlatList
+        initialScrollIndex={indexRef.current}
         indicatorStyle="black"
         ref={SlideShowRef}
         horizontal={true}
@@ -55,8 +56,11 @@ export default function Slideshow() {
         pagingEnabled={true}
         scrollEnabled={false}
         contentContainerStyle={{ alignItems: 'center', flexGrow: 1 }}
-        // snapToInterval={screenWidth - 20}
-        // decelerationRate="normal"
+        getItemLayout={(data, index) => ({
+          length: screenWidth - 20,
+          offset: (screenWidth - 20) * index,
+          index,
+        })}
       />
       <View>
         <Button

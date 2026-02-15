@@ -42,6 +42,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 10,
   },
-  img: { width: ' 49%', aspectRatio: 1, margin: '0.66%', borderRadius: 8 },
+  img: {
+    width: ' 49%',
+    aspectRatio: 1,
+    margin: '0.6%',
+    marginBottom: 8,
+    borderRadius: 8,
+    resizeMode: 'contain',
+    borderWidth: 2,
+    borderColor: 'rgb(69, 143, 233)',
+  },
   empty: { marginTop: 20, textAlign: 'center' },
 });

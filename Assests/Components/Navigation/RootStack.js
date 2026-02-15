@@ -15,7 +15,6 @@ const icons = {
 export default function RootStack() {
   return (
     <Tab.Navigator
-      initialRouteName="Slideshow"
       screenOptions={{
         headerShown: false,
         tabBarStyle: { height: 60, paddingTop: 10 },
@@ -25,10 +24,17 @@ export default function RootStack() {
         component={CameraScreen}
         options={{
           title: 'Camera',
-          tabBarIcon: () => (
-            <Image source={icons.camera} style={styles.image} />
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={icons.camera}
+              style={[
+                styles.image,
+                focused
+                  ? { tintColor: 'rgb(38, 85, 255)' }
+                  : { tintColor: '#000000' },
+              ]}
+            />
           ),
-          tabBarActiveTintColor: 'blue',
         }}
       />
       <Tab.Screen
@@ -36,8 +42,16 @@ export default function RootStack() {
         component={SensorsScreen}
         options={{
           title: 'Sensors',
-          tabBarIcon: () => (
-            <Image source={icons.sensors} style={styles.image} />
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={icons.sensors}
+              style={[
+                styles.image,
+                focused
+                  ? { tintColor: 'rgb(38, 85, 255)' }
+                  : { tintColor: '#000000' },
+              ]}
+            />
           ),
           tabBarActiveTintColor: 'blue',
         }}
@@ -47,8 +61,16 @@ export default function RootStack() {
         component={Gallary}
         options={{
           title: 'Gallary',
-          tabBarIcon: () => (
-            <Image source={icons.gallary} style={styles.image} />
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={icons.gallary}
+              style={[
+                styles.image,
+                focused
+                  ? { tintColor: 'rgb(38, 85, 255)' }
+                  : { tintColor: '#000000' },
+              ]}
+            />
           ),
           tabBarActiveTintColor: 'blue',
         }}
@@ -58,8 +80,16 @@ export default function RootStack() {
         component={Slideshow}
         options={{
           title: 'Slideshow',
-          tabBarIcon: () => (
-            <Image source={icons.slideshow} style={styles.image} />
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={icons.slideshow}
+              style={[
+                styles.image,
+                focused
+                  ? { tintColor: 'rgb(38, 85, 255)' }
+                  : { tintColor: '#000000' },
+              ]}
+            />
           ),
           tabBarActiveTintColor: 'blue',
         }}

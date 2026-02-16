@@ -1,4 +1,4 @@
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import {
@@ -6,10 +6,8 @@ import {
   SensorTypes,
   setUpdateIntervalForType,
 } from 'react-native-sensors';
-import {
-  CameraRoll,
-  cameraRollEventEmitter,
-} from '@react-native-camera-roll/camera-roll';
+
+import { getMediaFiles } from './CameraMethods';
 
 export function useIsAppActive() {
   const [isActive, setIsActive] = useState(AppState.currentState === 'active');
@@ -24,48 +22,48 @@ export function useIsAppActive() {
   return isActive;
 }
 
+//Location
 export function useGeoLocationPermission(isOn = true) {
   const [isGranted, setIsGranted] = useState(false);
   const [location, setLocation] = useState(null);
 
-  async function CheckPermission() {
+  const CheckPermission = useCallback(() => {
     Geolocation.requestAuthorization(
       () => setIsGranted(true),
       () => setIsGranted(false)
     );
-  }
+  }, []);
 
-  function GetLoc() {
-    console.log('tick');
+  const GetLoc = useCallback(() => {
     Geolocation.getCurrentPosition(
-      position => {
-        setLocation(position.coords);
-      },
-      error => {
-        console.log(error.code, error.message);
-      }
+      position => setLocation(position.coords),
+      error => console.log(error.code, error.message),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
     );
-  }
+  }, []);
 
   useEffect(() => {
-    console.log('isOn ' + isOn);
+    CheckPermission();
+  }, [CheckPermission]);
+
+  useEffect(() => {
     if (!isGranted || !isOn) return;
 
     GetLoc();
     const timer = setInterval(GetLoc, 10000);
-
     return () => clearInterval(timer);
-  }, [isGranted, isOn]);
+  }, [isGranted, isOn, GetLoc]);
 
   return { isGranted, CheckPermission, location };
 }
 
+// Orientation XYZ
 export function useOrientationXYZ(isOn = true) {
   const [xyz, setXyz] = useState({ x: 0, y: 0, z: 0 });
 
   useEffect(() => {
     if (!isOn) return;
-    console.log('on');
+
     setUpdateIntervalForType(SensorTypes.accelerometer, 500);
 
     const sub = accelerometer.subscribe(({ x, y, z }) => {
@@ -82,37 +80,24 @@ export function useOrientationXYZ(isOn = true) {
   return xyz;
 }
 
-const APP_ALBUM = 'Jovision Album';
-const isAndroid = Platform.OS === 'android';
-
-export function useGallery(albumName = 'Jovision Album') {
-  const [photos, setPhotos] = useState([]); // array of URIs
+export function useGallery() {
+  const [photos, setPhotos] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  async function loadPhotos() {
-    try {
-      const res = await CameraRoll.getPhotos({
-        first: 20,
-        assetType: 'Photos',
-        groupTypes: 'Album',
-        groupName: 'Jovision Album',
-      });
+  const load = useCallback(async () => {
+    const files = await getMediaFiles();
+    setPhotos(files);
+  }, []);
 
-      setPhotos(res.edges.map(e => e.node.image.uri));
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  async function refresh() {
+  const refresh = useCallback(async () => {
     setRefreshing(true);
-    await loadPhotos();
+    await load();
     setRefreshing(false);
-  }
+  }, [load]);
 
   useEffect(() => {
-    loadPhotos();
-  }, []);
+    load();
+  }, [load]);
 
   return { photos, refreshing, refresh };
 }

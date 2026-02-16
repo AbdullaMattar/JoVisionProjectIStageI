@@ -17,7 +17,7 @@ export default function Slideshow() {
   const indexRef = useRef(0);
   const isFocused = useIsFocused();
   const isAppActive = useIsAppActive();
-  const { photos, refreshing, refresh } = useGallery('Jovision Album');
+  const { photos, refreshing, refresh } = useGallery();
   const SlideShowRef = useRef();
   const [isPaused, setIsPaused] = useState(false);
 

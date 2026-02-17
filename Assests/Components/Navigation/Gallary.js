@@ -22,6 +22,7 @@ export default function Gallery() {
   const [selected, setSelected] = useState({
     uri: '',
     type: null,
+    index: null,
   });
   const isAppActive = useIsAppActive();
   const [modalVisible, setModalVisible] = useState(false);
@@ -29,16 +30,17 @@ export default function Gallery() {
   const [renameVisible, setRenameVisible] = useState(false);
   const [fullScreenVisible, setFullScreenVisible] = useState(false);
   useEffect(() => {
-    if (isFocused && isAppActive) refresh();
+    if (isFocused && isAppActive) {
+      refresh();
+      setModalVisible(false);
+    }
   }, [isFocused, isAppActive]);
 
   if (!isFocused || !isAppActive) return <Text>Not Active</Text>;
   function toggleRename() {
     setRenameVisible(p => !p);
   }
-  function toggleFullScreen() {
-    setFullScreenVisible(p => !p);
-  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Gallery</Text>
@@ -50,7 +52,7 @@ export default function Gallery() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={refresh} />
         }
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const ext = item.split('.').pop()?.toLowerCase();
           const isVideo = ['mp4', 'mov', 'm4v'].includes(ext);
 
@@ -59,7 +61,7 @@ export default function Gallery() {
               <Pressable
                 onPress={() => {
                   setModalVisible(true);
-                  setSelected({ uri: item, type: isVideo });
+                  setSelected({ uri: item, type: isVideo, index: index });
                   setFullScreenVisible(false);
                   setRenameVisible(false);
                 }}>
@@ -95,6 +97,7 @@ export default function Gallery() {
                   navigation.navigate('MediaViewer', {
                     uri: selected?.uri,
                     type: selected?.type,
+                    index: selected?.index,
                   })
                 }
               />

@@ -23,10 +23,6 @@ export async function saveMedia({ uri, fileName, type }) {
   return `file://${dst}`;
 }
 
-export async function saveVideo({ uri, fileName }) {
-  return savePicture({ uri, fileName }); // same thing
-}
-
 export async function getMediaFiles() {
   try {
     const dir = await ensureDir();

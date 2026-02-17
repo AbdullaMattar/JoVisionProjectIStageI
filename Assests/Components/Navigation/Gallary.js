@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Image,
@@ -6,21 +6,39 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  Pressable,
+  Alert,
+  Modal,
+  Button,
+  TextInput,
 } from 'react-native';
-import { useGallery, useIsAppActive } from '../hooks';
-import { useIsFocused } from '@react-navigation/native';
+import { useGallery, useIsAppActive, renameFile, deleteFile } from '../hooks';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Video from 'react-native-video';
 
 export default function Gallery() {
   const { photos: media, refreshing, refresh } = useGallery();
   const isFocused = useIsFocused();
+  const [selected, setSelected] = useState({
+    uri: '',
+    type: null,
+  });
   const isAppActive = useIsAppActive();
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
+  const [renameVisible, setRenameVisible] = useState(false);
+  const [fullScreenVisible, setFullScreenVisible] = useState(false);
   useEffect(() => {
     if (isFocused && isAppActive) refresh();
   }, [isFocused, isAppActive]);
 
   if (!isFocused || !isAppActive) return <Text>Not Active</Text>;
-
+  function toggleRename() {
+    setRenameVisible(p => !p);
+  }
+  function toggleFullScreen() {
+    setFullScreenVisible(p => !p);
+  }
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Gallery</Text>
@@ -38,7 +56,15 @@ export default function Gallery() {
 
           return (
             <View style={styles.itemWrapper}>
-              <Image source={{ uri: item }} style={styles.item} />
+              <Pressable
+                onPress={() => {
+                  setModalVisible(true);
+                  setSelected({ uri: item, type: isVideo });
+                  setFullScreenVisible(false);
+                  setRenameVisible(false);
+                }}>
+                <Image source={{ uri: item }} style={styles.item} />
+              </Pressable>
 
               {isVideo && (
                 <View style={styles.videoTag}>
@@ -50,12 +76,78 @@ export default function Gallery() {
         }}
         ListEmptyComponent={<Text style={styles.empty}>No media yet</Text>}
       />
+      {/* options modal */}
+      <Modal
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <Pressable
+          style={styles.modalBG}
+          onPress={() => setModalVisible(false)}>
+          <Pressable style={styles.optionsPortal}>
+            <Text style={{ color: 'black', fontSize: 22 }}>Options</Text>
+            <View style={styles.optionsBtns}>
+              <Button title="Rename" onPress={toggleRename} />
+              {renameVisible && <Rename />}
+              <Button
+                title="Fullscreen"
+                onPress={() =>
+                  navigation.navigate('MediaViewer', {
+                    uri: selected?.uri,
+                    type: selected?.type,
+                  })
+                }
+              />
+              <Button title="Delete" onPress={Delete} />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
+
+  function Rename() {
+    const [fileName, setfileName] = useState();
+
+    async function changebtn() {
+      if (fileName === undefined) return;
+      try {
+        await renameFile(selected.uri, String(fileName).trim());
+      } catch (e) {
+        console.log(e);
+      } finally {
+        refresh();
+        setModalVisible(false);
+      }
+    }
+    return (
+      <View style={{ gap: 10, borderWidth: 6, borderRadius: 10, padding: 25 }}>
+        <Text>File Name : {selected.uri}</Text>
+        <TextInput
+          placeholder="Enter the new file name"
+          placeholderTextColor={'black'}
+          style={styles.textInput}
+          onChangeText={t => setfileName(t)}
+        />
+        <Button title="Change" color={'rgb(215, 147, 0)'} onPress={changebtn} />
+      </View>
+    );
+  }
+
+  async function Delete() {
+    await deleteFile(selected.uri);
+    refresh();
+    setModalVisible(false);
+  }
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, alignItems: 'center' },
+  container: {
+    position: 'relative',
+    flex: 1,
+    padding: 10,
+    alignItems: 'center',
+  },
   title: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
 
   item: {
@@ -90,5 +182,37 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  optionsPortal: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBG: {
+    flex: 1,
+    position: 'relative',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionsBtns: {
+    width: '100%',
+    padding: 20,
+    marginTop: 10,
+    gap: 25,
+    borderTopWidth: 5,
+    borderRadius: 10,
+    borderTopColor: 'rgba(207, 22, 22, 0.5)',
+  },
+
+  textInput: {
+    color: 'black',
+    padding: 10,
+    borderWidth: 5,
+    borderRadius: 10,
+    borderTopColor: 'rgba(13, 113, 141, 0.5)',
   },
 });

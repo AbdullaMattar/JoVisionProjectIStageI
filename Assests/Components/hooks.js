@@ -6,6 +6,7 @@ import {
   SensorTypes,
   setUpdateIntervalForType,
 } from 'react-native-sensors';
+import RNFS from 'react-native-fs';
 
 import { getMediaFiles } from './CameraMethods';
 
@@ -100,4 +101,37 @@ export function useGallery() {
   }, [load]);
 
   return { photos, refreshing, refresh };
+}
+
+export async function renameFile(oldUri, newName) {
+  const oldPath = oldUri.replace('file://', '');
+
+  const exists = await RNFS.exists(oldPath);
+  if (!exists) throw new Error('File Dosent Exist');
+  const extension = oldPath.substring(oldPath.lastIndexOf('.')); // .jpg
+
+  const folderPath = oldPath.substring(0, oldPath.lastIndexOf('/'));
+
+  const newPath = `${folderPath}/${newName}${extension}`;
+
+  await RNFS.moveFile(oldPath, newPath);
+
+  return 'file://' + newPath;
+}
+
+export async function deleteFile(uri) {
+  try {
+    const path = uri.replace('file://', '');
+
+    const exists = await RNFS.exists(path);
+    if (!exists) {
+      console.log('File does not exist');
+      return;
+    }
+
+    await RNFS.unlink(path);
+    console.log('Deleted successfully');
+  } catch (error) {
+    console.log('Delete error:', error);
+  }
 }

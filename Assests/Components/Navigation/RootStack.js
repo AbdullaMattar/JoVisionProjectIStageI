@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import CameraScreen from './Camera';
 import SensorsScreen from './Sensors';
 import Gallary from './Gallary';
-import Slideshow from './Slideshow';
+import MediaViewer from './MediaViewer';
 import { Image, StyleSheet } from 'react-native';
 const Tab = createBottomTabNavigator();
 const icons = {
@@ -76,22 +76,11 @@ export default function RootStack() {
         }}
       />
       <Tab.Screen
-        name="Slideshow"
-        component={Slideshow}
+        name="MediaViewer"
+        component={MediaViewer}
         options={{
-          title: 'Slideshow',
-          tabBarIcon: ({ focused }) => (
-            <Image
-              source={icons.slideshow}
-              style={[
-                styles.image,
-                focused
-                  ? { tintColor: 'rgb(38, 85, 255)' }
-                  : { tintColor: '#000000' },
-              ]}
-            />
-          ),
-          tabBarActiveTintColor: 'blue',
+          title: 'MediaViewer',
+          tabBarItemStyle: { display: 'none' },
         }}
       />
     </Tab.Navigator>

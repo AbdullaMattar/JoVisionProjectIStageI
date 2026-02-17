@@ -38,8 +38,3 @@ export async function getMediaFiles() {
     return [];
   }
 }
-
-export async function deleteMediaFile(uriOrPath) {
-  const p = cleanPath(uriOrPath);
-  if (await RNFS.exists(p)) await RNFS.unlink(p);
-}

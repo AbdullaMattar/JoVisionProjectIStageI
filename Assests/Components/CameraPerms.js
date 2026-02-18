@@ -47,9 +47,10 @@ export function useMediaPermission() {
   return { hasPermission, requestPermission };
 }
 
-export async function savePicture({ uri, type, album, hasPermission }) {
-  if (Platform.OS === 'android' && !hasPermission)
-    throw new Error('invalid permission');
-  await CameraRoll.saveAsset(uri, { type, album });
-  return true;
-}
+// export async function savePicture({ uri, type, album, hasPermission }) {
+//   // old approach
+//   if (Platform.OS === 'android' && !hasPermission)
+//     throw new Error('invalid permission');
+//   await CameraRoll.saveAsset(uri, { type, album });
+//   return true;
+// }

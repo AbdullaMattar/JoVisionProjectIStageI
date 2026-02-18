@@ -1,4 +1,4 @@
-import { AppState } from 'react-native';
+import { AppState, PermissionsAndroid } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import {
@@ -9,6 +9,10 @@ import {
 import RNFS from 'react-native-fs';
 
 import { getMediaFiles } from './CameraMethods';
+import {
+  useDeviceOrientationChange,
+  useOrientationChange,
+} from 'react-native-orientation-locker';
 
 export function useIsAppActive() {
   const [isActive, setIsActive] = useState(AppState.currentState === 'active');
@@ -27,35 +31,63 @@ export function useIsAppActive() {
 export function useGeoLocationPermission(isOn = true) {
   const [isGranted, setIsGranted] = useState(false);
   const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
+  const [image, setimage] = useState('PORTRAIT');
+  const activityImg = {
+    car: require('../Images/car.png'),
+    walk: require('../Images/walk.png'),
+    sit: require('../Images/sit.png'),
+  };
+  const X = 3.0;
+  const Y = 0.5;
 
-  const CheckPermission = useCallback(() => {
-    Geolocation.requestAuthorization(
-      () => setIsGranted(true),
-      () => setIsGranted(false)
-    );
-  }, []);
-
-  const GetLoc = useCallback(() => {
-    Geolocation.getCurrentPosition(
-      position => setLocation(position.coords),
-      error => console.log(error.code, error.message),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
-    );
+  function getActivity(speed = 0) {
+    if (speed > X) return 'car';
+    if (speed > Y) return 'walk';
+    return 'sit';
+  }
+  useEffect(() => {
+    (async () => {
+      const res = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      setIsGranted(res === PermissionsAndroid.RESULTS.GRANTED);
+    })();
   }, []);
 
   useEffect(() => {
-    CheckPermission();
-  }, [CheckPermission]);
+    if (!isOn || !isGranted) return;
 
+    let cancelled = false;
+
+    const getLoc = () => {
+      Geolocation.getCurrentPosition(
+        pos => {
+          if (cancelled) return;
+          setError(null);
+          setLocation(pos.coords);
+        },
+        err => {
+          if (cancelled) return;
+          setError(`${err.code}: ${err.message}`);
+        },
+        { enableHighAccuracy: true, timeout: 50000, maximumAge: 100 }
+      );
+    };
+
+    getLoc();
+    const id = setInterval(getLoc, 10000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [isOn, isGranted]);
   useEffect(() => {
-    if (!isGranted || !isOn) return;
-
-    GetLoc();
-    const timer = setInterval(GetLoc, 10000);
-    return () => clearInterval(timer);
-  }, [isGranted, isOn, GetLoc]);
-
-  return { isGranted, CheckPermission, location };
+    const activity = getActivity(location?.speed);
+    setimage(activityImg[activity]);
+  }, [location]);
+  return { isGranted, location, error, image };
 }
 
 // Orientation XYZ
@@ -134,4 +166,26 @@ export async function deleteFile(uri) {
   } catch (error) {
     console.log('Delete error:', error);
   }
+}
+
+export function useOrientationImage(isOn = true) {
+  const {
+    isGranted: hasLocPerm,
+    error: error,
+    location: location,
+  } = useGeoLocationPermission(isOn);
+  const [ori, setOri] = useState('PORTRAIT');
+
+  useDeviceOrientationChange(o => {
+    if (!isOn) return;
+    setOri(o);
+  });
+  const orientationImg = {
+    PORTRAIT: require('../Images/por.png'),
+    'LANDSCAPE-LEFT': require('../Images/land_left.png'),
+    'LANDSCAPE-RIGHT': require('../Images/land_right.png'),
+    'PORTRAIT-UPSIDEDOWN': require('../Images/upside_por.png'),
+  };
+
+  return orientationImg[ori] || orientationImg.PORTRAIT;
 }

@@ -28,7 +28,6 @@ export default function Gallery() {
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
   const [renameVisible, setRenameVisible] = useState(false);
-  const [fullScreenVisible, setFullScreenVisible] = useState(false);
   useEffect(() => {
     if (isFocused && isAppActive) {
       refresh();
@@ -62,7 +61,6 @@ export default function Gallery() {
                 onPress={() => {
                   setModalVisible(true);
                   setSelected({ uri: item, type: isVideo, index: index });
-                  setFullScreenVisible(false);
                   setRenameVisible(false);
                 }}>
                 <Image source={{ uri: item }} style={styles.item} />

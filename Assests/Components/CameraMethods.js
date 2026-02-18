@@ -17,7 +17,7 @@ export async function saveMedia({ uri, fileName, type }) {
 
   const dir = await ensureDir();
   const dst =
-    type === 'photo' ? `${dir}/${fileName}.png` : `${dir}/${fileName}.mov`;
+    type === 'photo' ? `${dir}/${fileName}.png` : `${dir}/${fileName}.mp4`;
 
   await RNFS.copyFile(cleanPath(uri), dst);
   return `file://${dst}`;

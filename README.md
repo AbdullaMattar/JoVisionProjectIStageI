@@ -1,6 +1,3 @@
-Here's the README I'll write for you:
-
-````markdown
 # JoVision Project — Stage II
 
 A React Native mobile app with camera capture, sensor monitoring, and media gallery features.
@@ -48,10 +45,4 @@ A React Native mobile app with camera capture, sensor monitoring, and media gall
 ```bash
 npm install
 npx react-native run-android
-```
-````
-
-```
-
-Toggle to **Act mode** and I'll write this to `README.md`.
 ```
